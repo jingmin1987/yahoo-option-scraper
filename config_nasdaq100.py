@@ -10,7 +10,6 @@ PROJECT_PATH = (r'C:\Users\GlowingToilet\Google Drive\Projects'
 
 from configparser import ConfigParser
 
-symbol_list_path = PROJECT_PATH + '/Symbols.csv'
 save_path = PROJECT_PATH
 config_path = PROJECT_PATH + '/config_nasdaq100.ini'
 ext_path = r'C:\Users\GlowingToilet\Downloads\extension_1_10_4.crx'
@@ -22,7 +21,6 @@ symbol_tb = 'symbol_nasdaq100'
 
 config = ConfigParser()
 config['DEFAULT'] = {
-    'SymbolListPath': symbol_list_path,
     'BatchSize': '11',
     'SavePath': save_path,
     'ExtensionPath': ext_path,
