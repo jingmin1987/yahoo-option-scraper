@@ -5,7 +5,7 @@ Created on Thu Feb  9 18:49:44 2017
 @author: Jingmin Zhang
 """
 PROJECT_PATH = (r'C:\Users\GlowingToilet\Google Drive\Projects'
-                + r'\yahoo_option_scraper')
+                + r'\yahoo-option-scraper')
 import os
 import time
 

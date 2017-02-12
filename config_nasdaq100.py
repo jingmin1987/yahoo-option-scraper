@@ -6,7 +6,7 @@ Created on Sun Feb  5 23:24:09 2017
 """
 
 PROJECT_PATH = (r'C:\Users\GlowingToilet\Google Drive\Projects'
-                + r'\yahoo_option_scraper')
+                + r'\yahoo-option-scraper')
 
 from configparser import ConfigParser
 

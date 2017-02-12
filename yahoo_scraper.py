@@ -15,7 +15,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-
+from selenium.common.exceptions import StaleElementReferenceException
 
 class YahooScraper:
     """Yahoo Finance Option Scraper"""
@@ -146,7 +146,7 @@ class YahooScraper:
         element, i = None, 0
         while (element is None) and (i < self.max_tries):
             if i > 0:
-                self.browser.refresh() 
+                self.browser.refresh()
                 
             element = self._wait_for_element(xpath_str)
             i += 1
@@ -228,16 +228,28 @@ class YahooScraper:
             xpath_str = ('//*[@id="quote-header-info"]/div[2]/'
                          'div[1]/div/span[1]')
             
-            element = self._try_refresh_element(xpath_str)
+            is_element_found = False
+            while not is_element_found:
+                try:
+                    element = self._try_refresh_element(xpath_str)
+                    price = element.text
+                    is_element_found = True
+                except StaleElementReferenceException:
+                    print('Element detached. Retrying...')
+                
             
-            price = element.text
-                    
             # Current Yahoo time
             xpath_str = '//*[@id="quote-market-notice"]/span'
-            element = self._try_refresh_element(xpath_str)
             
-            yahoo_time = element.text
-                            
+            is_element_found = False
+            while not is_element_found:
+                try:
+                    element = self._try_refresh_element(xpath_str) 
+                    yahoo_time = element.text
+                    is_element_found = True
+                except StaleElementReferenceException:
+                    print('Element detached. Retrying...')  
+                    
             # Current option prices
             xpath_str = ('//*[@id="main-0-Quote-Proxy"]/section/div[2]/'
                          'section/div/section/section[1]/table/tbody/tr[1]')
@@ -249,8 +261,8 @@ class YahooScraper:
                 # This could happen when on the specific expiration date,
                 # only put option is available. Ignore the day and continue
                 # the loop.
-                print('No option price for expiration date: {}'.format(
-                        expiration_date))
+                print('No option price for {0} on expiration date: {1}'.format(
+                        yahoo_symbol, expiration_date))
                 continue
             finally:
                 # Time the page loading regardless

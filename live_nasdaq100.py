@@ -2,13 +2,11 @@
 """
 Created on Sun Feb  5 23:09:46 2017
 
-TODO: calculate delta of volumes each iteration
-
 @author: Jingmin Zhang
 """
 
 PROJECT_PATH = (r'C:\Users\GlowingToilet\Google Drive\Projects'
-                + r'\yahoo_option_scraper')
+                + r'\yahoo-option-scraper')
 
 from yahoo_scraper import YahooScraper
 from configparser import ConfigParser
@@ -17,6 +15,7 @@ import numpy as np
 import sqlite3
 import time
 from datetime import datetime
+from pandas.io.sql import DatabaseError
 
 def dynamic_sleep_interval(start_time):
     """Provides dynamic sleep interval"""
@@ -63,13 +62,18 @@ while True:
     if datetime.now() > start_time and datetime.now() < end_time:
         if read_symbols: # Only run once per trading session
             # Check if symbol list is updated today
-            sql = ('SELECT DISTINCT max(Date) as Date FROM '
-                   + config['CURRENT']['SymbolTableName'])
-            conn = sqlite3.connect(config['CURRENT']['DatabasePath'])
-            last_update_date = pd.read_sql_query(sql, conn)
-            last_update_date = last_update_date.values[0][0]
-            is_upto_date = last_update_date == str(datetime.now().date())
-            
+            try:
+                sql = ('SELECT DISTINCT max(Date) as Date FROM '
+                       + config['CURRENT']['SymbolTableName'])
+                conn = sqlite3.connect(config['CURRENT']['DatabasePath'])
+                last_update_date = pd.read_sql_query(sql, conn)
+                last_update_date = last_update_date.values[0][0]
+                is_upto_date = last_update_date == str(datetime.now().date())
+            except:
+                print('Failed to request symbols from database, '
+                      'downloading symbol list now.')
+                is_upto_date = False
+
             if not is_upto_date:
                 if not batch_num: # Batch 0 will update the list
                     try:
@@ -78,21 +82,26 @@ while True:
                                           ignore_index=True)['Symbol'])
                         df['Date'] = str(datetime.date(datetime.now()))
                         conn = sqlite3.connect(
-                                config['CURRENT']['DatabasePath'])
+                            config['CURRENT']['DatabasePath'])
                         df.to_sql(config['CURRENT']['SymbolTableName'], conn, 
-                                  if_exists = 'append', index=False)
+                                  if_exists='append', index=False)
                         conn.close()
                     except Exception as inst:
                         print(repr(inst))
                 else:
                     is_updated = False
                     while not is_updated: # Wait for list to be updated
-                        conn = sqlite3.connect(
+                        print('Waiting for symbol list to be updated...')
+                        try:
+                            conn = sqlite3.connect(
                                 config['CURRENT']['DatabasePath'])
-                        last_update_date = pd.read_sql_query(sql, conn)
-                        last_update_date = last_update_date.values[0][0]
-                        is_updated = (
+                            last_update_date = pd.read_sql_query(sql, conn)
+                            last_update_date = last_update_date.values[0][0]
+                            is_updated = (
                                 last_update_date == str(datetime.now().date()))
+                        except:
+                            is_updated = False
+                            
                         time.sleep(1)
                                     
             # Read symbol list from database
@@ -120,10 +129,34 @@ while True:
 
         ys = YahooScraper(symbols, ext_path=config['CURRENT']['ExtensionPath'])
         ys.scrape_all()
+
+        try:
+            # Pull cumulative sum of option volumes till now for today
+            sql = ('SELECT "Contract Name", sum(Volume) as Volume_sum FROM '
+                   + config['CURRENT']['DataTableName']
+                   + ' WHERE "Download Date" = "'
+                   + str(datetime.now().date())
+                   + '" '
+                   + 'GROUP BY "Contract Name" ')
+            conn = sqlite3.connect(config['CURRENT']['DatabasePath'])
+            vol_sum = pd.read_sql_query(sql, conn)
+            conn.close()
+            
+            # Calculate the incremental change
+            df = ys.data.merge(vol_sum, how='left', on='Contract Name')
+            df['Volume_sum'].apply(lambda x: 0 if np.isnan(x) else x)
+            df['Volume'] = df['Volume'] - df['Volume_sum']
+            df['Volume'].apply(lambda x: 0 if np.isnan(x) else x)
+            ys.data = df.drop('Volume_sum', axis=1)
+        except DatabaseError:
+            print('No historical data of today. Writing to the database '
+                  'directly...')
+        
+        # Export the incremental volume to database
         conn = sqlite3.connect(config['CURRENT']['DatabasePath'])
         ys.save_to_sqlite(config['CURRENT']['DataTableName'], conn)
         conn.close()
-        time.sleep(2) # Prevent too frequent looping
+        time.sleep(1) # Prevent too frequent looping
     else:
         print('Out of trading session...Sleeping...')
         interval = dynamic_sleep_interval(start_time)
