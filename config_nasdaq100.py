@@ -5,14 +5,14 @@ Created on Sun Feb  5 23:24:09 2017
 @author: Jingmin Zhang
 """
 
+PROJECT_PATH = (r'C:\Users\GlowingToilet\Google Drive\Projects'
+                + r'\yahoo_option_scraper')
+
 from configparser import ConfigParser
 
-symbol_list_path = (r'C:\Users\GlowingToilet\Google Drive\Projects'
-                    + r'\Yahoo_Option_Scraper\Symbols.csv')
-save_path = (r'C:\Users\GlowingToilet\Google Drive\Projects'
-             + r'\Yahoo_Option_Scraper')
-config_path = (r'C:\Users\GlowingToilet\Google Drive\Projects'
-               + r'\Yahoo_Option_Scraper\config_nasdaq100.ini')
+symbol_list_path = PROJECT_PATH + '/Symbols.csv'
+save_path = PROJECT_PATH
+config_path = PROJECT_PATH + '/config_nasdaq100.ini'
 ext_path = r'C:\Users\GlowingToilet\Downloads\extension_1_10_4.crx'
 database_path = (r'C:\Users\GlowingToilet\Google Drive\Databases'
                  + '\SQLite3\yahoo_options.db')

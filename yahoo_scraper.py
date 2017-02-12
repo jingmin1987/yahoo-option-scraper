@@ -20,7 +20,7 @@ from selenium.webdriver.common.keys import Keys
 class YahooScraper:
     """Yahoo Finance Option Scraper"""
     
-    def __init__(self, symbols, max_tries=5, explicit_wait=5, ext_path=None):
+    def __init__(self, symbols, max_tries=3, explicit_wait=5, ext_path=None):
         # Parameters
         if not isinstance(symbols, list):
             self.symbols = [symbols]
@@ -145,9 +145,11 @@ class YahooScraper:
         
         element, i = None, 0
         while (element is None) and (i < self.max_tries):
+            if i > 0:
+                self.browser.refresh() 
+                
             element = self._wait_for_element(xpath_str)
             i += 1
-            self.browser.refresh()
         
         if element is None:
             raise ElementEmptyError
@@ -159,9 +161,11 @@ class YahooScraper:
         
         elements, i = None, 0
         while (elements is None) and (i < self.max_tries):
+            if i > 0:
+                self.browser.refresh() 
+                
             elements = self._wait_for_elements(xpath_str)
             i += 1
-            self.browser.refresh()
         
         if elements is None:
             raise ElementEmptyError
@@ -237,10 +241,20 @@ class YahooScraper:
             # Current option prices
             xpath_str = ('//*[@id="main-0-Quote-Proxy"]/section/div[2]/'
                          'section/div/section/section[1]/table/tbody/tr[1]')
-            element = self._try_refresh_element(
-                         xpath_str) # Just to make sure the content is loaded
             
-            self.timer['Page Load'].append(timer.stop())
+            try:
+                element = self._try_refresh_element(
+                             xpath_str) # Make sure the content is loaded
+            except ElementEmptyError:
+                # This could happen when on the specific expiration date,
+                # only put option is available. Ignore the day and continue
+                # the loop.
+                print('No option price for expiration date: {}'.format(
+                        expiration_date))
+                continue
+            finally:
+                # Time the page loading regardless
+                self.timer['Page Load'].append(timer.stop())
             
             timer = Timer() # Time table parsing
             dfs = pd.read_html(self.browser.page_source)
@@ -322,15 +336,22 @@ class Timer():
         return time.clock() - self.start
         
 class SymbolNotFoundError(Exception):
+    """Symbol page could not be located"""
+    
     pass  
                  
 class Page404Error(Exception):
+    """Yahoo has thrown more 404 pages than we can handle"""
     pass
 
 class ElementNotFoundError(Exception):
+    """Element not found given XPATH"""
+    
     pass
 
 class ElementEmptyError(Exception):
+    """Element found but returned as None"""
+    
     pass
                     
             

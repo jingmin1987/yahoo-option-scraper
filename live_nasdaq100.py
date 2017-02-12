@@ -7,6 +7,9 @@ TODO: calculate delta of volumes each iteration
 @author: Jingmin Zhang
 """
 
+PROJECT_PATH = (r'C:\Users\GlowingToilet\Google Drive\Projects'
+                + r'\yahoo_option_scraper')
+
 from yahoo_scraper import YahooScraper
 from configparser import ConfigParser
 import pandas as pd
@@ -30,8 +33,7 @@ def dynamic_sleep_interval(start_time):
                                               
         
 # Read config
-config_path = (r'C:\Users\GlowingToilet\Google Drive\Projects'
-               + r'\Yahoo_Option_Scraper\config_nasdaq100.ini')
+config_path = PROJECT_PATH + '/config_nasdaq100.ini'
 config = ConfigParser()
 config.read(config_path)
 
