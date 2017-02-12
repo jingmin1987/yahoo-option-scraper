@@ -61,31 +61,48 @@ while True:
                                       microsecond=0)
         
     if datetime.now() > start_time and datetime.now() < end_time:
-        if read_symbols: # Download NASDAQ100 symbol list every day once
-            # Avoid duplicate downloads on multiple instances
-            if not batch_num: # Batch 0
-                try:
-                    df = pd.read_html('http://www.cnbc.com/nasdaq-100/')
-                    df = pd.DataFrame(df[0].append(df[1], 
-                                      ignore_index=True)['Symbol'])
-                    df['Date'] = str(datetime.date(datetime.now()))
-                    conn = sqlite3.connect(config['CURRENT']['DatabasePath'])
-                    df.to_sql(config['CURRENT']['SymbolTableName'], conn, 
-                              if_exists = 'append', index=False)
-                    conn.close()
-                except Exception as inst:
-                    print(repr(inst))
-           
-            time.sleep(5)  # Wait for list update from Batch 0
-            
-            # Read symbol list from database
+        if read_symbols: # Only run once per trading session
+            # Check if symbol list is updated today
+            sql = ('SELECT DISTINCT max(Date) as Date FROM '
+                   + config['CURRENT']['SymbolTableName'])
             conn = sqlite3.connect(config['CURRENT']['DatabasePath'])
+            last_update_date = pd.read_sql_query(sql, conn)
+            last_update_date = last_update_date.values[0][0]
+            is_upto_date = last_update_date == str(datetime.now().date())
+            
+            if not is_upto_date:
+                if not batch_num: # Batch 0 will update the list
+                    try:
+                        df = pd.read_html('http://www.cnbc.com/nasdaq-100/')
+                        df = pd.DataFrame(df[0].append(df[1], 
+                                          ignore_index=True)['Symbol'])
+                        df['Date'] = str(datetime.date(datetime.now()))
+                        conn = sqlite3.connect(
+                                config['CURRENT']['DatabasePath'])
+                        df.to_sql(config['CURRENT']['SymbolTableName'], conn, 
+                                  if_exists = 'append', index=False)
+                        conn.close()
+                    except Exception as inst:
+                        print(repr(inst))
+                else:
+                    is_updated = False
+                    while not is_updated: # Wait for list to be updated
+                        conn = sqlite3.connect(
+                                config['CURRENT']['DatabasePath'])
+                        last_update_date = pd.read_sql_query(sql, conn)
+                        last_update_date = last_update_date.values[0][0]
+                        is_updated = (
+                                last_update_date == str(datetime.now().date()))
+                        time.sleep(1)
+                                    
+            # Read symbol list from database
             sql = ('SELECT DISTINCT Symbol FROM '
                    + config['CURRENT']['SymbolTableName']
                    + ' WHERE Date IN '
                    + '(SELECT Date FROM '
                    + config['CURRENT']['SymbolTableName']
                    + ' ORDER BY date DESC LIMIT 1)')
+            conn = sqlite3.connect(config['CURRENT']['DatabasePath'])
             symbols = pd.read_sql_query(sql, conn)
             conn.close() 
                 
