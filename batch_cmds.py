@@ -24,5 +24,5 @@ cmd = (r'start cmd /c python "'
        + '/live_nasdaq100.py"')
 for i in range(NUM_OF_PROCESS):
     os.system(cmd)
-    time.sleep(4) # To avoid prior instance fail to write the batch number
+    time.sleep(5) # To avoid prior instance fail to write the batch number
     

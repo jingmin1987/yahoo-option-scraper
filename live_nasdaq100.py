@@ -132,21 +132,30 @@ while True:
 
         try:
             # Pull cumulative sum of option volumes till now for today
+            sql_symbols = ','.join(['"' + s + '"' for s in ys.symbols])
+            
             sql = ('SELECT "Contract Name", sum(Volume) as Volume_sum FROM '
                    + config['CURRENT']['DataTableName']
                    + ' WHERE "Download Date" = "'
                    + str(datetime.now().date())
-                   + '" '
-                   + 'GROUP BY "Contract Name" ')
+                   + '" AND Volume IS NOT NULL'
+                   + ' AND Symbol in ('
+                   + sql_symbols
+                   + ')'
+                   + ' GROUP BY "Contract Name" ')
             conn = sqlite3.connect(config['CURRENT']['DatabasePath'])
             vol_sum = pd.read_sql_query(sql, conn)
             conn.close()
             
             # Calculate the incremental change
             df = ys.data.merge(vol_sum, how='left', on='Contract Name')
-            df['Volume_sum'].apply(lambda x: 0 if np.isnan(x) else x)
+            df['Volume_sum'] = df['Volume_sum'].apply(
+                    lambda x: 0 if np.isnan(x) else x)
+            
             df['Volume'] = df['Volume'] - df['Volume_sum']
-            df['Volume'].apply(lambda x: 0 if np.isnan(x) else x)
+            df['Volume'] = df['Volume'].apply(
+                    lambda x: 0 if x < 0 or np.isnan(x) else x)
+            
             ys.data = df.drop('Volume_sum', axis=1)
         except DatabaseError:
             print('No historical data of today. Writing to the database '
