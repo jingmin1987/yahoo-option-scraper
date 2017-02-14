@@ -10,7 +10,7 @@ import os
 import time
 
 # System parameter
-NUM_OF_PROCESS = 15
+NUM_OF_PROCESS = 10
 
 # Reset config
 cmd = (r'start cmd /c python "' 

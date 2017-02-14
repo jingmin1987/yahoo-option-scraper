@@ -27,7 +27,7 @@ config['DEFAULT'] = {
     'DatabasePath': database_path,
     'DataTableName': data_tb,
     'SymbolTableName': symbol_tb,
-    'StartTimeLocal': '(9, 45, 0)',
+    'StartTimeLocal': '(9, 45, 30)',
     'EndTimeLocal': '(16, 15, 0)',
     'NASDAQ100': nas100_url
 }
