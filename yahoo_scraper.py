@@ -18,7 +18,41 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import StaleElementReferenceException
 
 class YahooScraper:
-    """Yahoo Finance Option Scraper"""
+    """Yahoo Finance Option Scraper
+    
+    A crawler and scraper using Selenium to load dynamic webpage elements and
+    download option data. Please make sure you have Chrome webdriver downloaded
+    and its folder added to the %PATH%
+    
+    Parameters:
+    -----------
+    symbols : str or list of str
+        Symbol list of stocks of interest. Make sure it matches Yahoo tickers.
+        
+    max_tries : int, positive, default 3
+        Max number of tries of loading the webpage before it gives up on
+        finding the element.
+        
+    explicit_wait : int, positive, default 5
+        A passthrough variable to WebdriverWait(). It tells how many second
+        the browser can wait for an element to load before declaring unfound.
+        
+    ext_path : str, a file path, default None
+        Extention path to a .crx file for Chrome. uBlock Origin is recommended
+        to speed up page loading.
+    
+    Attributes:
+    -----------
+    data : Pandas DataFrame
+        Contains the option data in the same tabular format seen at Yahoo.
+        
+    timer : dict
+        Contains timer for post analysis purposes.
+        Browser Open: time from startup to showing first blank page.
+        Page load: time for each url load
+        DF Parse: time for parsing the data table from HTML
+        Total Time: time for whole session
+    """
     
     def __init__(self, symbols, max_tries=3, explicit_wait=5, ext_path=None):
         # Parameters
@@ -173,7 +207,19 @@ class YahooScraper:
         return elements
     
     def scrape_one_stock(self, symbol, browser_quit=True):
-        """Yahoo Finance Option Scraper"""
+        """Yahoo Finance Option Scraper Lite
+        
+        Scrape and crawl one symbol.
+        
+        Parameters:
+        -----------
+        symbol : str
+            Ticker of the stock of interest
+            
+        browser_quit : boolean, default True
+            Browser behavior when function finishes or encounter an unhandled
+            error. True means browser will be closed.
+        """
         
         yahoo_symbol = symbol
         
@@ -299,7 +345,16 @@ class YahooScraper:
             self.browser = None
             
     def scrape_all(self, browser_quit=True):
-        """Scrape data for all stocks from Yahoo Finance"""
+        """Scrape All Symbols
+        
+        Scrape and crawl all symbols in the self.symbols
+        
+        Parameters:
+        -----------
+        browser_quit : boolean, default True
+            Browser behavior when function finishes or encounter an unhandled
+            error. True means browser will be closed.
+        """
         
         for symbol in self.symbols:
             timer = Timer() # Time each iteration
@@ -341,6 +396,7 @@ class YahooScraper:
         self.data.to_sql(name, conn, if_exists=if_exists, index=index)
 
 class Timer():
+    """Time the time"""
     def __init__(self):
         self.start = time.clock()
         

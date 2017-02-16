@@ -2,6 +2,8 @@
 """
 Created on Sun Feb  5 23:24:09 2017
 
+Configuration file generator.
+
 @author: Jingmin Zhang
 """
 

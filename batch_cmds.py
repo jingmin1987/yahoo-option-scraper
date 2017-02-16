@@ -2,6 +2,8 @@
 """
 Created on Thu Feb  9 18:49:44 2017
 
+Batch commands to run multiple instances of crawler simultaneously.
+
 @author: Jingmin Zhang
 """
 PROJECT_PATH = (r'C:\Users\GlowingToilet\Google Drive\Projects'

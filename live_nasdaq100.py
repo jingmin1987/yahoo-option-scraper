@@ -2,6 +2,11 @@
 """
 Created on Sun Feb  5 23:09:46 2017
 
+Please note, this live version (runs 24/7) relies on interaction with SQLite3
+SQL server that one can build on his/her own PC. Modification has to be made
+to be connected to other types of data systems such as server-client type SQL
+systems, HADOOP or flat files.
+
 @author: Jingmin Zhang
 """
 
@@ -18,7 +23,25 @@ from datetime import datetime
 from pandas.io.sql import DatabaseError
 
 def dynamic_sleep_interval(start_time):
-    """Provides dynamic sleep interval"""
+    """Dynamic Sleep Interval
+    
+    Returns sleep interval based on the time of the day: if before market open,
+    it returns the time between now and open; if after close, it returns the
+    time between now and end of the day.
+    
+    Note it can only handle the case where now() is outside trading window.
+    
+    Parameter
+    ---------
+    start_time : datetime obj
+        Start time of trading hours.
+        
+    Return
+    ------
+    max(interval, 1) : int, in seconds
+       Sleep interval in seconds.
+    
+    """
     
     eod_time = datetime.now().replace(hour=23, minute=59, second=59)
     time_to_start = start_time - datetime.now()
@@ -29,7 +52,25 @@ def dynamic_sleep_interval(start_time):
         interval = time_to_start.total_seconds() - 1
                                               
     return np.max([interval, 1]) # At least 1 second to avoid special cases
-                                              
+
+def report_time(fmt='%Y-%m-%d %H:%M:%S'):
+    """ Current Time in Format
+    Report current time in user specificied format
+
+    Parameter:
+    ----------
+    fmt : str, default '%Y-%m-%d %H:%M:%S'
+        A format string for datetime obj.
+        
+    Return:
+    -------
+    time_str : str
+        A str that represents current time in the specified format.
+
+    """                    
+    
+    return datetime.now().strftime(fmt)
+
         
 # Read config
 config_path = PROJECT_PATH + '/config_nasdaq100.ini'
@@ -42,7 +83,7 @@ config['CURRENT']['BatchNumber'] = str(batch_num + 1)
 with open(config_path, 'w') as configfile:
     config.write(configfile)
     
-print('Current Batch Number: {}'.format(batch_num))
+print('[{0}]Current Batch Number: {1}'.format(report_time(), batch_num))
 read_symbols = True
 
 while True:
@@ -70,8 +111,8 @@ while True:
                 last_update_date = last_update_date.values[0][0]
                 is_upto_date = last_update_date == str(datetime.now().date())
             except:
-                print('Failed to request symbols from database, '
-                      'downloading symbol list now.')
+                print('[{}]Failed to request symbols from database, '
+                      'downloading symbol list now.'.format(report_time()))
                 is_upto_date = False
 
             if not is_upto_date:
@@ -91,7 +132,8 @@ while True:
                 else:
                     is_updated = False
                     while not is_updated: # Wait for list to be updated
-                        print('Waiting for symbol list to be updated...')
+                        print('[{}]Waiting for symbol list to be updated'
+                              '...'.format(report_time()))
                         try:
                             conn = sqlite3.connect(
                                 config['CURRENT']['DatabasePath'])
@@ -128,6 +170,7 @@ while True:
                 break
 
         ys = YahooScraper(symbols, ext_path=config['CURRENT']['ExtensionPath'])
+        print('[{}]Start scraping option data...'.format(report_time()))
         ys.scrape_all()
 
         try:
@@ -158,8 +201,8 @@ while True:
             
             ys.data = df.drop('Volume_sum', axis=1)
         except DatabaseError:
-            print('No historical data of today. Writing to the database '
-                  'directly...')
+            print('[{}]No historical data of today. Writing to the database '
+                  'directly...'.format(report_time()))
         
         # Export the incremental volume to database
         conn = sqlite3.connect(config['CURRENT']['DatabasePath'])
@@ -167,7 +210,7 @@ while True:
         conn.close()
         time.sleep(1) # Prevent too frequent looping
     else:
-        print('Out of trading session...Sleeping...')
+        print('[{}]Out of trading session...Sleeping...'.format(report_time()))
         interval = dynamic_sleep_interval(start_time)
         time.sleep(interval)
         read_symbols = True
