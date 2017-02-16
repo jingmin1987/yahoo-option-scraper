@@ -8,7 +8,7 @@ The difficulty of this project is that the option data element is not presented 
 
 # How it works
 Here you will see several files:
-* yahoo_scraper.py: This is one does most of the heavy lifting. Once it has a symbol list, it can crawl and scrape all option data related to the symbols.
+* yahoo_scraper.py: This is the one that does most of the heavy lifting. Once it has a symbol list, it can crawl and scrape all option data related to the symbols.
 * live_nasdaq100.py: This file reads in your config.ini file, and then runs yahoo_scraper.py and saves the data to SQLite3 server. One has to modify it to fit his/her needs. In my setting, it downloads the symbol list of NASDAQ100.
 * config_nasdaq100.py: Make a config file that can be read by live_nasdaq100.py.
 * batch_cmds.py: Runs config_nasdaq100.py first, and bunch of live_nasdaq100.py's to speed up downloading process.
