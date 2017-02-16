@@ -53,7 +53,7 @@ symbols = symbols.merge(pd.DataFrame(bins, columns=['Bin']),
 # 1. Total optiona volume by timestamp
 sql = ('SELECT Symbol, sum(Volume) as Volume, "Download Time" FROM '
        + config['CURRENT']['DataTableName']
-       + ' WHERE "Download Date" = "2017-02-15"'
+       + ' WHERE "Download Date" = "2017-02-16"'
        + ' GROUP BY Symbol, "Download Time"')
 
 conn = sqlite3.connect(config['CURRENT']['DatabasePath'])
@@ -93,14 +93,6 @@ vol_by_15 = vol_by_15.fillna(-1)
 
 plt.figure(figsize=(10, 20))
 sns.heatmap(vol_by_15)
-
-zscore = lambda x: (x - x.mean()) / x.std()
-vol_by_time['Vol_sqrt'] = vol_by_time['Volume'].apply(np.sqrt)
-vol_by_time['Vol_sqrt_z'] = (
-   vol_by_time.groupby(by='Symbol')['Vol_sqrt'].transform(zscore))
-vol_by_time['Time'] = vol_by_time['Download Time'].apply(
-        lambda x: datetime.strptime(x, '%H:%M:%S.%f').time())
-
 
 # 2. Total volume by EOD
 vol_by_eod = vol_by_time.pivot_table(values='Volume', 
