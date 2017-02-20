@@ -7,6 +7,10 @@ SQL server that one can build on his/her own PC. Modification has to be made
 to be connected to other types of data systems such as server-client type SQL
 systems, HADOOP or flat files.
 
+One caveat of this system is that Yahoo Finance only starts updating data when
+it's 15 minutes into trading and the data is supposed to be 15-minute delayed.
+I will double check this assumption and update code if required.
+
 @author: Jingmin Zhang
 """
 
@@ -49,7 +53,7 @@ def dynamic_sleep_interval(start_time):
     if time_to_start.total_seconds() <= 0:
         interval = (eod_time - datetime.now()).total_seconds()
     else:
-        interval = time_to_start.total_seconds() - 1
+        interval = time_to_start.total_seconds() + 1
                                               
     return np.max([interval, 1]) # At least 1 second to avoid special cases
 
@@ -99,8 +103,13 @@ while True:
                                       minute=end_time[1],
                                       second=end_time[2],
                                       microsecond=0)
-        
-    if datetime.now() > start_time and datetime.now() < end_time:
+    
+    # Get running weekdays
+    weekdays = eval(config['CURRENT']['RunWeekdays'])
+
+    if (datetime.now() > start_time and
+        datetime.now() < end_time and
+        datetime.now().weekday() in weekdays):
         if read_symbols: # Only run once per trading session
             # Check if symbol list is updated today
             try:

@@ -31,7 +31,8 @@ config['DEFAULT'] = {
     'SymbolTableName': symbol_tb,
     'StartTimeLocal': '(9, 45, 30)',
     'EndTimeLocal': '(16, 15, 0)',
-    'NASDAQ100': nas100_url
+    'NASDAQ100': nas100_url,
+    'RunWeekdays': '[0, 1, 2, 3, 4]'
 }
  
 config['CURRENT'] = {
