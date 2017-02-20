@@ -17,12 +17,12 @@ Here you will see several files:
 # How far I got
 On the first day I started 22 instances of live_nasdaq100.py's on my i7-4770K/16GB/2TB HDD Raid1 rig. So each instance kept downloading data of 5 symbols continuously. The CPU usage was almost always 100% during the day according to my wife since I left for work. By the end of the day, over half of the instances were terminated due to IO error (I need SSDs) but it still got over 1 million rows of records which take about 240MB on my drive. Below is a heat map of what happened during the day. (Blue means dead)
 
-![alt text][pic]
-[pic]: http://imgur.com/1ZuucIB.png "Performance"
+![alt text][pic1]
+[pic1]: https://github.com/jingmin1987/yahoo-option-scraper/blob/master/monitor/20170213.png "Performance"
 
 ## Update 02-19-2017
 The performance was better when I dialed down the number of instances from 22 to 10 and hopefully I can squash the remaining bugs soon.
 
-![alt text][pic]
-[pic]: https://github.com/jingmin1987/yahoo-option-scraper/blob/master/monitor/20170216.png "Performance"
+![alt text][pic2]
+[pic2]: https://github.com/jingmin1987/yahoo-option-scraper/blob/master/monitor/20170216.png "Performance"
 
