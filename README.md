@@ -19,3 +19,10 @@ On the first day I started 22 instances of live_nasdaq100.py's on my i7-4770K/16
 
 ![alt text][pic]
 [pic]: http://imgur.com/1ZuucIB.png "Performance"
+
+## Update 02-19-2017
+The performance was better when I dialed down the number of instances from 22 to 10 and hopefully I can squash the remaining bugs soon.
+
+![alt text][pic]
+[pic]: https://github.com/jingmin1987/yahoo-option-scraper/blob/master/monitor/20170216.png "Performance"
+
