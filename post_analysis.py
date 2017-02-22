@@ -53,7 +53,7 @@ symbols = symbols.merge(pd.DataFrame(bins, columns=['Bin']),
 # 1. Total optiona volume by timestamp
 sql = ('SELECT Symbol, sum(Volume) as Volume, "Download Time" FROM '
        + config['CURRENT']['DataTableName']
-       + ' WHERE "Download Date" = "2017-02-16"'
+       + ' WHERE "Download Date" = "2017-02-21"'
        + ' GROUP BY Symbol, "Download Time"')
 
 conn = sqlite3.connect(config['CURRENT']['DatabasePath'])

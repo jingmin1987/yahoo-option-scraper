@@ -136,7 +136,7 @@ class YahooScraper:
             self.timer['Browser Open'].append(timer.stop())
         
         timer = Timer() # Time page loading
-        self.browser.get(url)
+        self._try_get_url(url)
         
         if self._check_url(url):
             xpath_str = ('//*[@id="main-0-Quote-Proxy"]/section/div[2]/'
@@ -206,6 +206,29 @@ class YahooScraper:
             
         return elements
     
+    def _try_get_url(self, url):
+        """Try to get url loaded correctly
+        
+        Sometimes self.browser.get() throws unexpected errors which are usually
+        due to hardware issues. In this case, the browser will be restarted.
+        
+        """
+        
+        counter = 0
+        
+        while counter < self.max_tries:
+            try:
+                self.browser.get(url)
+                break
+            except:
+                self.browser.quit()
+                self.browser = webdriver.Chrome(chrome_options=self.profile)
+                counter += 1
+                
+        if counter == self.max_tries:
+            raise Exception('Failed to open {} so many times, check your '
+                            'router maybe?'.format(url))
+    
     def scrape_one_stock(self, symbol, browser_quit=True):
         """Yahoo Finance Option Scraper Lite
         
@@ -257,14 +280,14 @@ class YahooScraper:
             url = ('http://finance.yahoo.com/quote/' + yahoo_symbol + 
                    '/options?p=' + yahoo_symbol + '&date=' + expiration_date)
             timer = Timer() # Time page loading
-            self.browser.get(url)
+            self._try_get_url(url)
             
             # Handle random 404 pages
             if not self._check_url(url):
                 status, i = False, 0
                 while (not status) and (i < self.max_tries):
                     i += 1
-                    self.browser.get(url)
+                    self._try_get_url(url)
                     if self._check_url(url):
                         status = True
                 if not status: # Got only 404 pages
