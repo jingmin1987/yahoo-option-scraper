@@ -9,7 +9,6 @@ Batch commands to run multiple instances of crawler simultaneously.
 PROJECT_PATH = (r'C:\Users\GlowingToilet\Google Drive\Projects'
                 + r'\yahoo-option-scraper')
 import os
-import time
 
 # System parameter
 NUM_OF_PROCESS = 10
@@ -23,8 +22,6 @@ os.system(cmd)
 # Start scraping
 cmd = (r'start cmd /c python "' 
        + PROJECT_PATH 
-       + '/live_nasdaq100.py"')
-for i in range(NUM_OF_PROCESS):
-    os.system(cmd)
-    time.sleep(5) # To avoid prior instance fail to write the batch number
-    
+       + '/live_nasdaq100.py" {}'.format(NUM_OF_PROCESS))
+       
+os.system(cmd)

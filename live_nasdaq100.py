@@ -23,6 +23,8 @@ import pandas as pd
 import numpy as np
 import sqlite3
 import time
+import sys
+import os
 from datetime import datetime
 from pandas.io.sql import DatabaseError
 
@@ -89,6 +91,15 @@ with open(config_path, 'w') as configfile:
     
 print('[{0}]Current Batch Number: {1}'.format(report_time(), batch_num))
 read_symbols = True
+
+# Inception
+if len(sys.argv) > 1 and batch_num + 1 < int(sys.argv[1]):
+    cmd = (r'start cmd /c python "' 
+           + sys.argv[0]
+           + '" {}'.format(sys.argv[1]))
+    os.system(cmd)
+else:
+    print('[{}]End of batch chain.'.format(report_time()))
 
 while True:
     # Get start and end times
