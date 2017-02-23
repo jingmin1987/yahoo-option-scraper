@@ -53,7 +53,7 @@ symbols = symbols.merge(pd.DataFrame(bins, columns=['Bin']),
 # 1. Total optiona volume by timestamp
 sql = ('SELECT Symbol, sum(Volume) as Volume, "Download Time" FROM '
        + config['CURRENT']['DataTableName']
-       + ' WHERE "Download Date" = "2017-02-21"'
+       + ' WHERE "Download Date" = "2017-02-22"'
        + ' GROUP BY Symbol, "Download Time"')
 
 conn = sqlite3.connect(config['CURRENT']['DatabasePath'])
@@ -68,7 +68,7 @@ vol_by_time['Time'] = vol_by_time['Download Time'].apply(
 base_date = datetime.today()
 lower_bound = datetime.combine(base_date, time(9, 45))
 
-while lower_bound.time() <= time(16, 00):
+while lower_bound.time() <= time(16, 1):
     upper_bound = lower_bound + timedelta(0, 900)
     crit = (lambda x: np.bitwise_and(x['Time'] > lower_bound.time(),
                                      x['Time'] <= upper_bound.time()))

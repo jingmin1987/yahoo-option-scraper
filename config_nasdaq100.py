@@ -23,7 +23,7 @@ symbol_tb = 'symbol_nasdaq100'
 
 config = ConfigParser()
 config['DEFAULT'] = {
-    'BatchSize': '11',
+    'BatchSize': '15',
     'SavePath': save_path,
     'ExtensionPath': ext_path,
     'DatabasePath': database_path,

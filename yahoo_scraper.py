@@ -221,6 +221,7 @@ class YahooScraper:
                 self.browser.get(url)
                 break
             except:
+                print('URL openning failed, restarting...')
                 self.browser.quit()
                 self.browser = webdriver.Chrome(chrome_options=self.profile)
                 counter += 1

@@ -10,8 +10,8 @@ PROJECT_PATH = (r'C:\Users\GlowingToilet\Google Drive\Projects'
                 + r'\yahoo-option-scraper')
 import os
 
-# System parameter
-NUM_OF_PROCESS = 10
+# System parameter <= # of threads
+NUM_OF_PROCESS = 7
 
 # Reset config
 cmd = (r'start cmd /c python "' 
