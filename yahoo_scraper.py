@@ -346,9 +346,9 @@ class YahooScraper:
                 # Modify and append data to self.data
                 if df.shape[1] == 10:
                     # Determine option type
-                    idx = df['Contract Name'][0].find('C')
+                    idx = df['Contract Name'][0][5:].find('C')
                     option_type = 'Put'
-                    if idx > 5:
+                    if idx > -1:
                         option_type = 'Call'
                         
                     df['Expiration Date'] = date[1]
