@@ -11,6 +11,11 @@ One caveat of this system is that Yahoo Finance only starts updating data when
 it's 15 minutes into trading and the data is supposed to be 15-minute delayed.
 I will double check this assumption and update code if required.
 
+TODO:
+    1. (potentially) refactor YahooScraper to make it a standalone module
+    2. rewrite everything else as an exmpale of using YahooScraper
+    3. move the actual strategy into a separated project folder
+
 @author: Jingmin Zhang
 """
 
@@ -141,6 +146,8 @@ while True:
                         df = pd.read_html('http://www.cnbc.com/nasdaq-100/')
                         df = pd.DataFrame(df[0].append(df[1], 
                                           ignore_index=True)['Symbol'])
+                        df = df.append([{'Symbol': 'SPY'}, {'Symbol': 'QQQ'}], 
+                                       ignore_index=True)
                         df['Date'] = str(datetime.date(datetime.now()))
                         conn = sqlite3.connect(
                             config['CURRENT']['DatabasePath'])
